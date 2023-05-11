@@ -52,3 +52,4 @@
   <p>- https://www.youtube.com/watch?v=gSpEep-c2mo</p>
 </div>
 
+![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
