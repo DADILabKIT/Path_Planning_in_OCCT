@@ -63,7 +63,9 @@
 ## How to Use
 
 <div> 
-  <p>1. 먼저, 아나콘다 가상환경과 파이썬을 설치한다.</p>
-  <p>2. 다음 PyOCCT 공식 깃허브 사이트의 가이드를 참고하여 가상환경에 PyOCCT를 설치한다. (PyOCCT : https://github.com/trelau/pyOCCT)</p>
-  <p>3. 설치한 후 Vscode에서 폴더를 연 후 visualTest를 실행 후에 Bool Map에서 6*6*6 맵들을 터미널에 입력한다.(0은 자유 공간, 1은 장애물)</p>
+  <pre>1. 먼저, 아나콘다 가상환경과 파이썬을 설치한다.</pre>
+  <pre>2. 다음 PyOCCT 공식 깃허브 사이트의 가이드를 참고하여 가상환경에 PyOCCT를 설치한다. 
+  (PyOCCT : https://github.com/trelau/pyOCCT)</pre>
+  <pre>3. 설치한 후 Vscode에서 폴더를 연 후 visualTest를 실행 후에 Bool Map에서 6*6*6 맵들을 터미널에 입력한다.
+  (0은 자유 공간, 1은 장애물)</pre>
 </div>
