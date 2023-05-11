@@ -8,8 +8,18 @@ from OCC.Display.OCCViewer import Viewer3d
 from Box import Box
 from Node import Node
 
+
 class GridMap(Box):
     def __init__(self, startPoint: gp_Pnt = None, endPoint: gp_Pnt = None, display: Viewer3d = None ,mapSize: int = 0) -> None:
+        """
+        GridMap을 사용하기 위해서 InitNodeMapByIntMap함수를 통해서 NodeMap을 초기화해야한다.
+
+        Args:
+            startPoint (gp_Pnt, optional): minimum vertex in grid map . Defaults to None.
+            endPoint (gp_Pnt, optional): maximum vertex in grid map. Defaults to None.
+            display (Viewer3d, optional): instance from occt to display. Defaults to None.
+            mapSize (int, optional): grid map size. Defaults to 0.
+        """
         # grid map boundary
         super().__init__(startPoint, endPoint, display)
         
@@ -19,11 +29,13 @@ class GridMap(Box):
         # grid field
         self.MapSize: int = mapSize
         
-        self.NodeMap: list[list[list[Node]]] = self.InitNodeMap()
+        self.NodeMap: list[list[list[Node]]] = [[[None for _ in range(mapSize)] for _ in range(mapSize)] for _ in range(mapSize)]
         
     # for init
-    def InitNodeMap(self) -> list[list[list[Node]]]:
-        nodeMap = [[[None for _ in range(self.MapSize)] for _ in range(self.MapSize)] for _ in range(self.MapSize)]
+    def InitNodeMapByIntMap(self) -> None:
+        intMap: list[list[list[int]]] = [[list(map(int, input().split())) for _ in range(self.MapSize)] for _ in range(self.MapSize)]
+        
+        nodeMap: list[list[list[Node]]] = [[[None for _ in range(self.MapSize)] for _ in range(self.MapSize)] for _ in range(self.MapSize)]
         gap: float = (self.MaxPoint.X() - self.MinPoint.X()) / self.MapSize
         
         for i in range(self.MapSize):
@@ -41,7 +53,12 @@ class GridMap(Box):
                     
                     nodeMap[i][j][k] = Node(minPoint, maxPoint, self.Display, i, j, k)
                     
-        return nodeMap
+                    if (intMap[i][j][k] == 1):
+                        nodeMap[i][j][k].Obstacle = True
+                    
+        self.NodeMap = nodeMap
+
+        
     
     # for visual
     def DisplayAllNodeInMap(self, _transparency = 0, _color = 'black') -> None:
@@ -49,3 +66,10 @@ class GridMap(Box):
             for j in range(self.MapSize):
                 for k in range(self.MapSize):
                     self.NodeMap[i][j][k].DisplayBoxShape(_transparency, _color)
+                    
+    def DisplayObstaclesInMap(self, _transparency = 0, _color = 'black') -> None:
+        for i in range(self.MapSize):
+            for j in range(self.MapSize):
+                for k in range(self.MapSize):
+                    if (self.NodeMap[i][j][k].Obstacle == True):
+                        self.NodeMap[i][j][k].DisplayBoxShape(_transparency, _color)

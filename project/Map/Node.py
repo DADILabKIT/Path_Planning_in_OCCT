@@ -23,19 +23,29 @@ class Node(Box):
         self.h = 0.0
         self.g = 0.0
         
-    # for reset
+    # for reset and recycle
     def ResetNode(self):
         self.f = 0.0
         self.h = 0.0
         self.g = 0.0
 
-        self.par = None
+        self.Parent = None
 
         self.Obstacle = False
+        
+    def RecycleNode(self):
+        self.f = 0.0
+        self.h = 0.0
+        self.g = 0.0
+        
+        self.Parent = None
         
     # for heap
     def __lt__(self, other: 'Node'):
         return self.f < other.f
+    
     # for algorithm
     def __eq__(self, other: 'Node') -> bool:
-        return self.x == other.x and self.y == other.y and self.z == other.z
+        if (other is not None):
+            return self.x == other.x and self.y == other.y and self.z == other.z
+        

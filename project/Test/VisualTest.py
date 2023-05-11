@@ -11,12 +11,27 @@ from OCC.Display.SimpleGui import init_display
 
 # Map
 from Map.GridMap import GridMap
+from Map.Node import Node
+from Algoritm.Astar import Astar
 
+# display instance
 display, start_display, add_menu, add_menu_function = init_display()
 
-gridmap = GridMap(gp_Pnt(0, 0, 0), gp_Pnt(1000, 1000, 1000), display, 10)
-gridmap.DisplayAllNodeInMap()
+# init grid map
+gridmap = GridMap(gp_Pnt(0, 0, 0), gp_Pnt(1000, 1000, 1000), display, 6)
+gridmap.InitNodeMapByIntMap()
 
+# astar run
+startNode:Node = gridmap.NodeMap[0][0][0]
+endNode:Node = gridmap.NodeMap[5][5][5]
+
+astar = Astar(startNode, endNode, gridmap, display)
+astar.Run()
+astar.DisplayPathByPipe()
+
+
+gridmap.DisplayObstaclesInMap()
+# Camera Fitt all
 display.FitAll()
 
 start_display()
