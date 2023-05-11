@@ -52,4 +52,3 @@
   <p>- https://www.youtube.com/watch?v=gSpEep-c2mo</p>
 </div>
 
-[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=DADILabKIT)](https://github.com/DADILabKIT/github-readme-stats)
