@@ -55,12 +55,15 @@
 ## Sample of path planning example
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
   <p>● A* Algorithm in 3D Grid Map</p>
+<pre>
 
+
+</pre>
 
 ## How to Use
 
-<p> 
-  1. 먼저, 아나콘다 가상환경과 파이썬을 설치한다.
-  2. 다음 PyOCCT 공식 깃허브 사이트의 가이드를 참고하여 가상환경에 PyOCCT를 설치한다. (PyOCCT : https://github.com/trelau/pyOCCT)
-  3. 설치한 후 Vscode에서 폴더를 연 후 visualTest를 실행 후에 Bool Map에서 6*6*6 맵들을 터미널에 입력한다.(0은 자유 공간, 1은 장애물)
-</p>
+<div> 
+  <p>1. 먼저, 아나콘다 가상환경과 파이썬을 설치한다.</p>
+  <p>2. 다음 PyOCCT 공식 깃허브 사이트의 가이드를 참고하여 가상환경에 PyOCCT를 설치한다. (PyOCCT : https://github.com/trelau/pyOCCT)</p>
+  <p>3. 설치한 후 Vscode에서 폴더를 연 후 visualTest를 실행 후에 Bool Map에서 6*6*6 맵들을 터미널에 입력한다.(0은 자유 공간, 1은 장애물)</p>
+</div>
