@@ -54,4 +54,4 @@
 
 ## Sample of path planning example
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
-  <p>A* Algorithm in 3D Grid Map</p>
+  <p>● A* Algorithm in 3D Grid Map</p>
