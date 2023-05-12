@@ -42,6 +42,7 @@
 
 <pre>
 
+
 </pre>
 
 
@@ -55,6 +56,9 @@
 ## Sample of path planning example
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
   <p>● A* Algorithm in 3D Grid Map</p>
+  
+![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/02dd0f98-50e1-49ec-9baf-71d784bdc6b9)
+  <p>● Theta* Algorithm in 3D Grid Map</p>
 <pre>
 
 
