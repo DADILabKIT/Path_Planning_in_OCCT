@@ -28,7 +28,7 @@ class Agent:
         # results
         self.CalTime: float = 0.0
         self.Distance: float = 0.0
-        self.PathPoints: list[gp_Pnt] = None
+        self.PathPoints: list[Node] = None
         self.Degree: float = 0.0
         # start point and end point
         self.StartNode: Node = startNode
@@ -57,14 +57,15 @@ class Agent:
         self.ClosedList[src.x][src.y][src.z] = True
     
     def InitPath(self) -> None:
-        stack: list[gp_Pnt] = []
+        stack: list[Node] = []
         finder: Node = self.EndNode
         
-        while (finder.Parent != None):
-            stack.append(finder.CenterPoint)
+        while (finder.Parent != self.StartNode):
+            stack.append(finder)
             finder = finder.Parent
             
-        stack.append(self.StartNode.CenterPoint)
+        stack.append(finder)
+        stack.append(self.StartNode)
         self.PathPoints = stack
         
     def InitTime(self, startTime: float) -> None:
@@ -75,7 +76,7 @@ class Agent:
         length: int = len(self.PathPoints)
         
         for i in range(length - 1):
-            result += self.PathPoints[i].Distance(self.PathPoints[i + 1])    
+            result += self.PathPoints[i].CenterPoint.Distance(self.PathPoints[i + 1].CenterPoint)    
         self.Distance = result
         
     def InitDegree(self) -> None:
@@ -83,8 +84,8 @@ class Agent:
         length: int = len(self.PathPoints)
         
         for i in range(length - 2):
-            v1 = gp_Vec(self.PathPoints[i].XYZ() - self.PathPoints[i + 1].XYZ())
-            v2 = gp_Vec(self.PathPoints[i + 1].XYZ() - self.PathPoints[i + 2].XYZ())
+            v1 = gp_Vec(self.PathPoints[i].CenterPoint.XYZ() - self.PathPoints[i + 1].CenterPoint.XYZ())
+            v2 = gp_Vec(self.PathPoints[i + 1].CenterPoint.XYZ() - self.PathPoints[i + 2].CenterPoint.XYZ())
             v2.Reverse()
             
             dotVal: float = v1.Dot(v2)
@@ -102,16 +103,23 @@ class Agent:
     def CalHeuristic(self, src: Node) -> float:
         return ((self.EndNode.x - src.x) ** 2 + (self.EndNode.y - src.y) ** 2 + (self.EndNode.z - src.z) ** 2) ** 0.5
     
+    def CalHeuristicDst(self, src: Node, dst: Node) -> float:
+        return ((dst.x - src.x) ** 2 + (dst.y - src.y) ** 2 + (dst.z - src.z) ** 2) ** 0.5
+    
+    def DisplayPathByBox(self, _transparency: float = 0, _color = 'blue') -> None:
+        length = len(self.PathPoints)
+        for i in range(length):
+            self.PathPoints[i].DisplayBoxShape(_transparency, _color)
+
     
     def DisplayPathByPipe(self, _transparency: float = 0, _color = 'blue', diameter:float = 3) -> None:
         finalShape: TopoDS_Shape = TopoDS_Shape()
         length = len(self.PathPoints)
-        
         for i in range(length - 1):
-            directionEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(self.PathPoints[i], self.PathPoints[i + 1]).Edge()
+            directionEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(self.PathPoints[i].CenterPoint, self.PathPoints[i + 1].CenterPoint).Edge()
             directionWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(directionEdge).Wire()
             
-            directionCircle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[i], gp_Dir(self.PathPoints[i + 1].XYZ().Subtracted(self.PathPoints[i].XYZ()))), diameter)
+            directionCircle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[i].CenterPoint, gp_Dir(self.PathPoints[i + 1].CenterPoint.XYZ().Subtracted(self.PathPoints[i].CenterPoint.XYZ()))), diameter)
             directionCircleEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(directionCircle).Edge()
             directionCircleWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(directionCircleEdge).Wire()
             
@@ -123,5 +131,99 @@ class Agent:
                 finalShape = BRepAlgoAPI_Fuse(finalShape, pipeShape).Shape()
                 
         self.Display.DisplayShape(finalShape, transparency = _transparency ,color = _color)
+    
+    def LineOfSight3D(self, src: Node, dst: Node) -> bool:
+        x1, y1, z1 = src.x, src.y, src.z
+        x2, y2, z2 = dst.x, dst.y, dst.z
+        
+        if (x2 > x1):
+            xs = 1
+            dx = x2 - x1
+        else:
+            xs = -1
+            dx = x1 - x2
+            
+        if (y2 > y1):
+            ys = 1
+            dy = y2 - y1
+        else:
+            ys = -1
+            dy = y1 - y2
+            
+        if (z2 > z1):
+            zs = 1
+            dz = z2 - z1
+        else:
+            zs = -1
+            dz = z1 - z2 
             
             
+        if (dx >= dy and dx >= dz):
+            p1 = 2 * dy - dx
+            p2 = 2 * dz - dx
+            while (x1 != x2):
+                x1 += xs
+                if (p1 >= 0):
+                    y1 += ys
+                    p1 -= 2 * dx
+                if (p2 >= 0):
+                    z1 += zs
+                    p2 -= 2 * dx
+                p1 += 2 * dy
+                p2 += 2 * dz
+                if (self.IsObstacle(self.NodeMap[x1][y1][z1])):
+                    return False
+                
+        elif (dy >= dx and dy >= dz):
+            p1 = 2 * dx - dy
+            p2 = 2 * dz - dy
+            while (y1 != y2):
+                y1 += ys
+                if (p1 >= 0):
+                    x1 += xs
+                    p1 -= 2 * dy
+                if (p2 >= 0):
+                    z1 += zs
+                    p2 -= 2 * dy
+                p1 += 2 * dx
+                p2 += 2 * dz
+                if (self.IsObstacle(self.NodeMap[x1][y1][z1])):
+                    return False
+        else:
+            p1 = 2 * dy - dz
+            p2 = 2 * dx - dz
+            while (z1 != z2):
+                z1 += zs
+                if (p1 >= 0):
+                    y1 += ys
+                    p1 -= 2 * dz
+                if (p2 >= 0):
+                    x1 += xs
+                    p2 -= 2 * dz
+                p1 += 2 * dy
+                p2 += 2 * dx
+                if (self.IsObstacle(self.NodeMap[x1][y1][z1])):
+                    return False
+        return True
+    
+    def PostSmoothing(self) -> None:
+        result = []
+        finder: Node = self.EndNode
+        result.append(finder)
+        tmp: Node = finder.Parent
+        
+        while (finder != self.StartNode):
+            while (self.LineOfSight3D(finder, tmp.Parent)):
+                tmp = tmp.Parent
+                if (tmp == self.StartNode):
+                    break
+            if (tmp == self.StartNode):
+                break
+            
+            finder = tmp
+            tmp = finder.Parent
+            result.append(finder)
+        result.append(self.StartNode)
+        self.PathPoints = result
+        
+    

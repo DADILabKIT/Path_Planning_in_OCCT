@@ -25,6 +25,10 @@ class Node(Box):
         
     # for reset and recycle
     def ResetNode(self):
+        self.x = 0
+        self.y = 0
+        self.z = 0
+        
         self.f = 0.0
         self.h = 0.0
         self.g = 0.0

@@ -7,28 +7,19 @@ from OCC.Display.OCCViewer import Viewer3d
 
 # Custom
 from Agent import Agent
-from Map.Node import Node
 from Map.GridMap import GridMap
+from Map.Node import Node
 
-
-
-class Astar(Agent):
-    def __init__(self, startNode: Node, endNode: Node, griMap: GridMap, display: Viewer3d) -> None:
-        """_summary_
-
-        Args:
-            startNode (Node): start point
-            endNode (Node): end point
-            griMap (GridMap): grid map
-        """
-        super().__init__(startNode, endNode, griMap, display)
-                
+class Theta(Agent):
+    def __init__(self, startNode: Node = None, endNode: Node = None, gridMap: GridMap = None, display: Viewer3d = None) -> None:
+        super().__init__(startNode, endNode, gridMap, display)
         
     def Run(self):
         startTime: float = time.time()
-        self.StartNode.Parent =self.StartNode
+        self.StartNode.Parent = self.StartNode
         heapq.heappush(self.OpenList, self.StartNode)
         
+    
         while (self.OpenList):
             curNode: Node = heapq.heappop(self.OpenList)
             self.InitClosedList(curNode)
@@ -39,12 +30,10 @@ class Astar(Agent):
                 self.InitDistance()
                 self.InitDegree()
                 return None
-            
+                
             for i in range(-1, 2):
                 for j in range(-1, 2):
                     for k in range(-1, 2):
-                        if (i == 0 and j == 0 and k == 0):
-                            continue
                         
                         nx: int = i + curNode.x
                         ny: int = j + curNode.y
@@ -58,15 +47,25 @@ class Astar(Agent):
                         if (self.IsObstacle(nextNode)):
                             continue
                         
-                        cost: float = (max(-i, i) + max(-j, j) + max(-k, k)) ** 0.5
-                        ng: float = curNode.g + cost
+                        if (self.LineOfSight3D(curNode.Parent, nextNode)):
+                            ng: float = curNode.Parent.g + self.CalHeuristicDst(nextNode, curNode.Parent)
+                            if (nextNode.Parent == None or ng < nextNode.g):
+                                nextNode.g = ng
+                                nextNode.h = self.CalHeuristic(nextNode)
+                                nextNode.f = ng + nextNode.h
+                                
+                                nextNode.Parent = curNode.Parent
+
+                                heapq.heappush(self.OpenList, nextNode)
                         
-                        if (nextNode.Parent == None or ng < nextNode.g):
+                        elif (nextNode.Parent == None or ng < nextNode.g):
+                            cost: float = (max(-i, i) + max(-j, j) + max(-k, k)) ** 0.5
+                            ng: float = curNode.g + cost
+                            
                             nextNode.g = ng
                             nextNode.h = self.CalHeuristic(nextNode)
-                            nextNode.f = nextNode.g + nextNode.h
+                            nextNode.f = ng + nextNode.h
                             nextNode.Parent = curNode
                             
-                            heapq.heappush(self.OpenList, nextNode)
+                            heapq.heappush(self.OpenList, nextNode)     
                             
-            

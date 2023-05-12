@@ -73,3 +73,9 @@ class GridMap(Box):
                 for k in range(self.MapSize):
                     if (self.NodeMap[i][j][k].Obstacle == True):
                         self.NodeMap[i][j][k].DisplayBoxShape(_transparency, _color)
+                        
+    def RecycleNodeMap(self) -> None:
+        for i in range(self.MapSize):
+            for j in range(self.MapSize):
+                for k in range(self.MapSize):
+                    self.NodeMap[i][j][k].RecycleNode()

@@ -13,6 +13,7 @@ from OCC.Display.SimpleGui import init_display
 from Map.GridMap import GridMap
 from Map.Node import Node
 from Algoritm.Astar import Astar
+from Algoritm.Theta import Theta
 
 # display instance
 display, start_display, add_menu, add_menu_function = init_display()
@@ -25,13 +26,16 @@ gridmap.InitNodeMapByIntMap()
 startNode:Node = gridmap.NodeMap[0][0][0]
 endNode:Node = gridmap.NodeMap[5][5][5]
 
+#astar = Astar(startNode, endNode, gridmap, display)
 astar = Astar(startNode, endNode, gridmap, display)
-astar.Run()
-astar.DisplayPathByPipe()
+theta = Theta(startNode, endNode, gridmap, display)
 
-
+theta.Run()
+theta.DisplayPathByPipe()
 gridmap.DisplayObstaclesInMap()
+
 # Camera Fitt all
 display.FitAll()
 
 start_display()
+
