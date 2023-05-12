@@ -54,7 +54,7 @@
 </div>
 
 <div>
-  <p>Reference(A*)</p>
+  <p>Reference(Theta*)</p>
   <p>- https://news.movel.ai/theta-star?x-host=news.movel.ai</p>
   <p>- https://github.com/GurkNathe/Pathfinding-Algorithms</p>
   <p>- http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf</p>
