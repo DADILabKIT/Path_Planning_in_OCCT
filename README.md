@@ -53,6 +53,13 @@
   <p>- https://www.youtube.com/watch?v=gSpEep-c2mo</p>
 </div>
 
+<div>
+  <p>Reference(A*)</p>
+  <p>- https://news.movel.ai/theta-star?x-host=news.movel.ai</p>
+  <p>- https://github.com/GurkNathe/Pathfinding-Algorithms</p>
+  <p>- http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf</p>
+</div>
+
 ## Sample of path planning example
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
   <p>● A* Algorithm in 3D Grid Map</p>
