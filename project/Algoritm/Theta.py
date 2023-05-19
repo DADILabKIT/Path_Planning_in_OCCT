@@ -11,8 +11,8 @@ from Map.GridMap import GridMap
 from Map.Node import Node
 
 class Theta(Agent):
-    def __init__(self, startNode: Node = None, endNode: Node = None, gridMap: GridMap = None, display: Viewer3d = None) -> None:
-        super().__init__(startNode, endNode, gridMap, display)
+    def __init__(self, startNode: Node = None, endNode: Node = None, gridMap: GridMap = None, agentName:str = 'theta' ,display: Viewer3d = None) -> None:
+        super().__init__(startNode, endNode, gridMap, agentName, display)
         
     def Run(self):
         startTime: float = time.time()

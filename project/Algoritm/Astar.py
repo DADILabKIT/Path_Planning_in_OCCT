@@ -13,7 +13,7 @@ from Map.GridMap import GridMap
 
 
 class Astar(Agent):
-    def __init__(self, startNode: Node, endNode: Node, griMap: GridMap, display: Viewer3d) -> None:
+    def __init__(self, startNode: Node = None, endNode: Node = None, griMap: GridMap = None, agentName: str = 'astar', display: Viewer3d = None) -> None:
         """_summary_
 
         Args:
@@ -21,7 +21,10 @@ class Astar(Agent):
             endNode (Node): end point
             griMap (GridMap): grid map
         """
-        super().__init__(startNode, endNode, griMap, display)
+        super().__init__(startNode, endNode, griMap, agentName, display)
+        
+        
+
                 
         
     def Run(self):

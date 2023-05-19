@@ -1,6 +1,7 @@
 # Python
 import math
 import time
+import heapq
 
 # OCC
 # for 3D Data
@@ -16,7 +17,7 @@ from Map.Node import Node
 from Map.GridMap import GridMap
 
 class Agent:
-    def __init__(self, startNode: Node = None, endNode: Node = None, gridMap: GridMap = None, display: Viewer3d = None) -> None:
+    def __init__(self, startNode: Node = None, endNode: Node = None, nodeMap: GridMap = None, agentName:str = ' ', display: Viewer3d = None) -> None:
         """_summary_
 
         Args:
@@ -34,14 +35,21 @@ class Agent:
         self.StartNode: Node = startNode
         self.EndNode: Node = endNode
         # node map
-        self.NodeMap: list[list[list[Node]]] = gridMap.NodeMap
+        self.NodeMap: list[list[list[Node]]] = nodeMap
         # map size
-        self.N: int = len(gridMap.NodeMap)
+        self.N: int = len(nodeMap) if isinstance(nodeMap, list) else None
         # open set and closed set
         self.OpenList: list[Node] = []
-        self.ClosedList: list[list[list[bool]]] = [[[False for _ in range(self.N)] for _ in range(self.N)] for _ in range(self.N)]
+        self.ClosedList: list[list[list[bool]]] = [[[False for _ in range(self.N)] for _ in range(self.N)] for _ in range(self.N)] if isinstance(self.N, int) else None
         # display
         self.Display: Viewer3d = display
+        self.AgentName: str = agentName
+        
+    def reInit(self, startNode: Node = None, endNode: Node = None, griMap: GridMap = None, display: Viewer3d = None) -> None:
+        self.__init__(startNode, endNode, griMap, display)
+        
+    def Run(self) -> None:
+        return
         
         
     def IsOutOfRange(self, x: int, y: int, z: int) -> bool:
@@ -59,7 +67,7 @@ class Agent:
     def InitPath(self) -> None:
         stack: list[Node] = []
         finder: Node = self.EndNode
-        
+
         while (finder.Parent != self.StartNode):
             stack.append(finder)
             finder = finder.Parent
@@ -67,9 +75,9 @@ class Agent:
         stack.append(finder)
         stack.append(self.StartNode)
         self.PathPoints = stack
-        
+     
     def InitTime(self, startTime: float) -> None:
-        self.CalTime = startTime - time.time()
+        self.CalTime = time.time() - startTime
     
     def InitDistance(self) -> None:
         result: float = 0.0
@@ -207,12 +215,15 @@ class Agent:
         return True
     
     def PostSmoothing(self) -> None:
+        startTime = time.time()
         result = []
         finder: Node = self.EndNode
         result.append(finder)
         tmp: Node = finder.Parent
         
         while (finder != self.StartNode):
+            print(finder.x, finder.y, finder.z)
+            print(finder.Parent)
             while (self.LineOfSight3D(finder, tmp.Parent)):
                 tmp = tmp.Parent
                 if (tmp == self.StartNode):
@@ -224,6 +235,15 @@ class Agent:
             tmp = finder.Parent
             result.append(finder)
         result.append(self.StartNode)
+
+        self.CalTime += (time.time() - startTime)
         self.PathPoints = result
+        
+    def EnqueueOpenList(self, src: Node):
+        if (src is not None):
+            if ((not self.ClosedList[src.x][src.y][src.z])):
+                src.h = self.CalHeuristic(src)
+                src.f = src.h + src.g
+                heapq.heappush(self.OpenList, src)
         
     
