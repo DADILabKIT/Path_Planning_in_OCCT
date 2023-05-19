@@ -60,12 +60,21 @@
   <p>- http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf</p>
 </div>
 
+<div>
+  <p>Reference(Jps)</p>
+  <p>- https://ojs.aaai.org/index.php/SOCS/article/view/21762</p>
+  <p>- https://github.com/c2huc2hu/jps</p>
+</div>
+
 ## Sample of path planning example
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/e98708eb-e6a1-4fc8-92b0-19a6ad0603a2)
   <p>● A* Algorithm in 3D Grid Map</p>
   
 ![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/02dd0f98-50e1-49ec-9baf-71d784bdc6b9)
   <p>● Theta* Algorithm in 3D Grid Map</p>
+  
+![image](https://github.com/DADILabKIT/Path_Planning_in_OCCT/assets/128150322/3a3d050a-dd9a-4138-894e-9d6a274996d7)
+  <p>● JPS Algorithm in 3D Grid Map</p>
 <pre>
 
 
