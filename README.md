@@ -50,20 +50,27 @@
 <div>
   <p>Reference(A*)</p>
   <p>- https://www.youtube.com/watch?v=pUZhNMAqLbI</p>
+	<pre>A* 알고리즘에 대한 기본적인 이론 및 알고리즘 구현 설명</pre>
   <p>- https://www.youtube.com/watch?v=gSpEep-c2mo</p>
+	<pre>2D 그리드 맵 환경에서 A* 구현 설명</pre>
 </div>
 
 <div>
   <p>Reference(Theta*)</p>
   <p>- https://news.movel.ai/theta-star?x-host=news.movel.ai</p>
+	<pre>Theta*와 A*관련 비교 분석에 관한 해외 기사</pre>
   <p>- https://github.com/GurkNathe/Pathfinding-Algorithms</p>
+	<pre>Theta* 관련 오픈 소스(Python)</pre>
   <p>- http://idm-lab.org/bib/abstracts/papers/aaai07a.pdf</p>
+	<pre>Theta* 소개 논문</pre>
 </div>
 
 <div>
   <p>Reference(Jps)</p>
   <p>- https://ojs.aaai.org/index.php/SOCS/article/view/21762</p>
+	<pre>Jps 3D 소개 논문</pre>
   <p>- https://github.com/c2huc2hu/jps</p>
+	<pre>Jps 관련 오픈 소스(Python)</pre>
 </div>
 
 ## Sample of path planning example
