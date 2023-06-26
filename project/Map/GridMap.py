@@ -1,3 +1,5 @@
+import random
+
 # OCC
 # for 3D Data
 from OCC.Core.gp import gp_Pnt
@@ -30,6 +32,7 @@ class GridMap(Box):
         self.MapSize: int = mapSize
         
         self.NodeMap: list[list[list[Node]]] = [[[None for _ in range(mapSize)] for _ in range(mapSize)] for _ in range(mapSize)]
+        self.Gap: float = 0.0
         
     # for init
     def InitNodeMapByIntMap(self) -> None:
@@ -37,6 +40,7 @@ class GridMap(Box):
         
         nodeMap: list[list[list[Node]]] = [[[None for _ in range(self.MapSize)] for _ in range(self.MapSize)] for _ in range(self.MapSize)]
         gap: float = (self.MaxPoint.X() - self.MinPoint.X()) / self.MapSize
+        self.Gap = gap
         
         for i in range(self.MapSize):
             for j in range(self.MapSize):
@@ -60,7 +64,7 @@ class GridMap(Box):
         
     def InitNodeMapByRandom(self, boxNumber = 3):
         gap: float = (self.MaxPoint.X() - self.MinPoint.X()) / self.MapSize
-
+        self.Gap = gap
         for i in range(self.MapSize):
             for j in range(self.MapSize):
                 for k in range(self.MapSize):
@@ -86,6 +90,42 @@ class GridMap(Box):
                     s3, t3 = min(randomBox.RandBox[i][2], randomBox.RandBox[i + 1][2]), max(randomBox.RandBox[i][2], randomBox.RandBox[i + 1][2]) + 1
                     for z in range(s3, t3):
                         self.NodeMap[x][y][z].Obstacle = True
+                        
+    def InitNodeMapByRandom2(self, percent: float) -> None:
+        gap: float = (self.MaxPoint.X() - self.MinPoint.X()) / self.MapSize
+        self.Gap = gap
+        for i in range(self.MapSize):
+            for j in range(self.MapSize):
+                for k in range(self.MapSize):
+                    minX = self.MinPoint.X() + (i * gap)
+                    minY = self.MinPoint.Y() + (j * gap)
+                    minZ = self.MinPoint.Z() + (k * gap)
+                    minPoint: gp_Pnt = gp_Pnt(minX, minY, minZ)
+                    
+                    maxX = self.MinPoint.X() + ((i + 1) * gap)
+                    maxY = self.MinPoint.Y() + ((j + 1) * gap)
+                    maxZ = self.MinPoint.Z() + ((k + 1) * gap)                    
+                    maxPoint: gp_Pnt = gp_Pnt(maxX, maxY, maxZ)
+                    
+                    self.NodeMap[i][j][k] = Node(minPoint, maxPoint, self.Display, i, j, k)
+           
+        for i in range(self.MapSize):
+            for j in range(self.MapSize):
+                for k in range(self.MapSize):
+                    if (i == 0 and j ==0 and k ==0):
+                        continue
+                    elif (i == self.MapSize - 1 and j == self.MapSize - 1 and k == self.MapSize - 1):
+                        continue
+                    elif (k == self.MapSize - 1 and j == 0):
+                        continue
+                    elif (k == self.MapSize - 1 and i == self.MapSize - 1):
+                        continue
+                    elif (j == 0 and i == 0):
+                        continue
+                    if (self.PercentChance(percent)):
+                        self.NodeMap[i][j][k].Obstacle = True
+                    
+                
     
     # for visual
     def DisplayAllNodeInMap(self, _transparency = 0, _color = 'black') -> None:
@@ -106,3 +146,10 @@ class GridMap(Box):
             for j in range(self.MapSize):
                 for k in range(self.MapSize):
                     self.NodeMap[i][j][k].RecycleNode()
+                    
+    def PercentChance(self, percent: float) -> bool:
+        if random.random() < percent:
+            return True
+        else:
+            return False
+

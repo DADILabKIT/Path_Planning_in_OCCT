@@ -15,6 +15,7 @@ from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Fuse
 # Custom
 from Map.Node import Node
 from Map.GridMap import GridMap
+from Spline.Spline import SplineBuilder
 
 class Agent:
     def __init__(self, startNode: Node = None, endNode: Node = None, nodeMap: GridMap = None, agentName:str = ' ', display: Viewer3d = None) -> None:
@@ -67,13 +68,14 @@ class Agent:
     def InitPath(self) -> None:
         stack: list[Node] = []
         finder: Node = self.EndNode
-
+        
         while (finder.Parent != self.StartNode):
             stack.append(finder)
             finder = finder.Parent
             
         stack.append(finder)
         stack.append(self.StartNode)
+        
         self.PathPoints = stack
      
     def InitTime(self, startTime: float) -> None:
@@ -101,8 +103,10 @@ class Agent:
             
             dotVal = round(dotVal, 8)
             magnitude = round(magnitude, 8)
-            
-            degree: float = math.degrees(math.acos(dotVal / magnitude))
+            if (magnitude != 0):
+                degree: float = math.degrees(math.acos(dotVal / magnitude))
+            else:
+                degree = 0
             
             result += degree
             
@@ -120,14 +124,21 @@ class Agent:
             self.PathPoints[i].DisplayBoxShape(_transparency, _color)
 
     
-    def DisplayPathByPipe(self, _transparency: float = 0, _color = 'blue', diameter:float = 3) -> None:
+    def DisplayPathByPipe(self, _transparency: float = 0, _color = 'blue', diameter:float = 3, gap: float = 0.0) -> None:
         finalShape: TopoDS_Shape = TopoDS_Shape()
+        pointList: list[gp_Pnt] = []
+        pointList.append(gp_Pnt(self.PathPoints[0].CenterPoint.X(), self.PathPoints[0].CenterPoint.Y() + gap, self.PathPoints[0].CenterPoint.Z()))
         length = len(self.PathPoints)
-        for i in range(length - 1):
-            directionEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(self.PathPoints[i].CenterPoint, self.PathPoints[i + 1].CenterPoint).Edge()
+        for i in range(length):
+            pointList.append(self.PathPoints[i].CenterPoint)
+        
+        pointList.append(gp_Pnt(self.PathPoints[-1].CenterPoint.X(), self.PathPoints[-1].CenterPoint.Y() - gap, self.PathPoints[-1].CenterPoint.Z()))
+        
+        for i in range(length):
+            directionEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(pointList[i], pointList[i + 1]).Edge()
             directionWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(directionEdge).Wire()
             
-            directionCircle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[i].CenterPoint, gp_Dir(self.PathPoints[i + 1].CenterPoint.XYZ().Subtracted(self.PathPoints[i].CenterPoint.XYZ()))), diameter)
+            directionCircle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[i].CenterPoint, gp_Dir(pointList[i + 1].XYZ().Subtracted(pointList[i].XYZ()))), diameter)
             directionCircleEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(directionCircle).Edge()
             directionCircleWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(directionCircleEdge).Wire()
             
@@ -139,6 +150,70 @@ class Agent:
                 finalShape = BRepAlgoAPI_Fuse(finalShape, pipeShape).Shape()
                 
         self.Display.DisplayShape(finalShape, transparency = _transparency ,color = _color)
+        
+    def DisplayPathBySplinePipe(self, _transparency: float = 0, _color = 'blue', diameter:float = 3, gap: float  = 0.0) -> None:
+        pointList: list[gp_Pnt] = []
+        pointList.append(gp_Pnt(self.PathPoints[0].CenterPoint.X(), self.PathPoints[0].CenterPoint.Y() + gap, self.PathPoints[0].CenterPoint.Z()))
+        for i in range(len(self.PathPoints)):
+            pointList.append(self.PathPoints[i].CenterPoint)
+        pointList.append(gp_Pnt(self.PathPoints[-1].CenterPoint.X(), self.PathPoints[-1].CenterPoint.Y() - gap, self.PathPoints[-1].CenterPoint.Z()))
+        sb = SplineBuilder(pointList)
+        sb.SplineBuild()
+        print("knots")
+        print(sb.CurveShape.Knots().Lower(), sb.CurveShape.Knots().Upper())
+
+        for i in range(sb.CurveShape.Knots().Lower(), sb.CurveShape.Knots().Upper() + 1):
+            print(sb.CurveShape.Knots().Value(i))    
+        print("mults")
+        for i in range(sb.CurveShape.Multiplicities().Lower(), sb.CurveShape.Multiplicities().Upper() + 1):
+            print(sb.CurveShape.Multiplicities().Value(i))    
+        print("poles")
+        print(sb.CurveShape.Poles().Lower(), sb.CurveShape.Poles().Upper())
+
+        for i in range(sb.CurveShape.Poles().Lower(), sb.CurveShape.Poles().Upper() + 1):
+            print(sb.CurveShape.Poles().Value(i).X())
+        for i in range(sb.CurveShape.Poles().Lower(), sb.CurveShape.Poles().Upper() + 1):
+            print(sb.CurveShape.Poles().Value(i).Y())
+        for i in range(sb.CurveShape.Poles().Lower(), sb.CurveShape.Poles().Upper() + 1):
+            print(sb.CurveShape.Poles().Value(i).Z())
+        
+        print("degree")
+        print(sb.CurveShape.Degree()) 
+        
+        #print(sb.CurveShape.Poles())
+        #print(sb.CurveShape.Multiplicities())
+        edgeShape = BRepBuilderAPI_MakeEdge(sb.CurveShape).Shape()
+        wireShape = BRepBuilderAPI_MakeWire(edgeShape).Shape()
+        
+        Circle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[0].CenterPoint, gp_Dir(self.PathPoints[1].CenterPoint.XYZ().Subtracted(self.PathPoints[0].CenterPoint.XYZ()))), diameter)
+        CircleEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(Circle).Shape()
+        CircleWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(CircleEdge).Shape()
+            
+        pipeShape: TopoDS_Shape = BRepOffsetAPI_MakePipe(wireShape, CircleWire).Shape()
+            
+        if (not pipeShape.IsNull()):
+            self.Display.DisplayShape(pipeShape, transparency = _transparency ,color = _color)
+            
+    def DisplayPathBySplinePipe2(self, _transparency: float = 0, _color = 'blue', diameter:float = 3, gap:float = 0.0) -> None:
+        pointList: list[gp_Pnt] = []
+        pointList.append(gp_Pnt(self.PathPoints[0].CenterPoint.X(), self.PathPoints[0].CenterPoint.Y() + gap, self.PathPoints[0].CenterPoint.Z()))
+        
+        for i in range(len(self.PathPoints)):
+            pointList.append(self.PathPoints[i].CenterPoint)
+        pointList.append(gp_Pnt(self.PathPoints[-1].CenterPoint.X(), self.PathPoints[-1].CenterPoint.Y() - gap, self.PathPoints[-1].CenterPoint.Z()))
+        sb = SplineBuilder(pointList)
+        sb.SplineBuild2()
+        edgeShape = BRepBuilderAPI_MakeEdge(sb.CurveShape).Shape()
+        wireShape = BRepBuilderAPI_MakeWire(edgeShape).Shape()
+        
+        Circle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[0].CenterPoint, gp_Dir(self.PathPoints[1].CenterPoint.XYZ().Subtracted(self.PathPoints[0].CenterPoint.XYZ()))), diameter)
+        CircleEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(Circle).Shape()
+        CircleWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(CircleEdge).Shape()
+            
+        pipeShape: TopoDS_Shape = BRepOffsetAPI_MakePipe(wireShape, CircleWire).Shape()
+            
+        if (not pipeShape.IsNull()):
+            self.Display.DisplayShape(pipeShape, transparency = _transparency ,color = _color)
     
     def LineOfSight3D(self, src: Node, dst: Node) -> bool:
         x1, y1, z1 = src.x, src.y, src.z
@@ -222,8 +297,6 @@ class Agent:
         tmp: Node = finder.Parent
         
         while (finder != self.StartNode):
-            print(finder.x, finder.y, finder.z)
-            print(finder.Parent)
             while (self.LineOfSight3D(finder, tmp.Parent)):
                 tmp = tmp.Parent
                 if (tmp == self.StartNode):
@@ -235,15 +308,27 @@ class Agent:
             tmp = finder.Parent
             result.append(finder)
         result.append(self.StartNode)
-
         self.CalTime += (time.time() - startTime)
         self.PathPoints = result
         
     def EnqueueOpenList(self, src: Node):
         if (src is not None):
             if ((not self.ClosedList[src.x][src.y][src.z])):
+                
                 src.h = self.CalHeuristic(src)
                 src.f = src.h + src.g
                 heapq.heappush(self.OpenList, src)
         
-    
+    def EnqueueOpenList2(self, src: Node):
+        if (src is not None):
+            if ((not self.ClosedList[src.x][src.y][src.z])):
+                while (self.LineOfSight3D(src.Parent.Parent, src)):
+                    if (src.Parent == self.StartNode):
+                        break
+                    src.Parent = src.Parent.Parent
+                    src.g = self.CalHeuristicDst(src.Parent, src) + src.Parent.g
+                              
+                src.h = self.CalHeuristic(src)
+                src.f = src.h + src.g
+                heapq.heappush(self.OpenList, src)
+        
