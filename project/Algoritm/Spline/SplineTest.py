@@ -24,11 +24,22 @@ knots.SetValue(4, 1672.6039399558574)
 knots.SetValue(5, 1922.6039399558574)
 
 
-
+# n
 poles = TColgp_Array1OfPnt(1, 10)
-for i in range(1 ,9 + 1 + 1):
-    val = list(map(float, input().split()))
-    poles.SetValue(i, gp_Pnt(val[0], val[1], val[2]))
+poles.SetValue(1, gp_Pnt(0,0,0))
+poles.SetValue(2, gp_Pnt(100,100,0))
+poles.SetValue(3, gp_Pnt(100,100,100))
+poles.SetValue(4, gp_Pnt(200,200,500))
+poles.SetValue(5, gp_Pnt(500,500,30))
+poles.SetValue(6, gp_Pnt(600,700,900))
+poles.SetValue(7, gp_Pnt(700,700,1000))
+poles.SetValue(8, gp_Pnt(1100,1100,1000))
+poles.SetValue(9, gp_Pnt(1200,2100,1000))
+poles.SetValue(10, gp_Pnt(1500,1500,1800))
+# poles = TColgp_Array1OfPnt(1, 10)
+# for i in range(1 ,9 + 1 + 1):
+#     val = list(map(float, input().split()))
+#     poles.SetValue(i, gp_Pnt(val[0], val[1], val[2]))
 
 
 

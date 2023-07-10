@@ -128,14 +128,16 @@ class Agent:
         finalShape: TopoDS_Shape = TopoDS_Shape()
         pointList: list[gp_Pnt] = []
         pointList.append(gp_Pnt(self.PathPoints[0].CenterPoint.X(), self.PathPoints[0].CenterPoint.Y() + gap, self.PathPoints[0].CenterPoint.Z()))
-        length = len(self.PathPoints)
+        length = len(self.PathPoints) 
         for i in range(length):
             pointList.append(self.PathPoints[i].CenterPoint)
         
         pointList.append(gp_Pnt(self.PathPoints[-1].CenterPoint.X(), self.PathPoints[-1].CenterPoint.Y() - gap, self.PathPoints[-1].CenterPoint.Z()))
         
         for i in range(length):
-            directionEdge: TopoDS_Edge = BRepBuilderAPI_MakeEdge(pointList[i], pointList[i + 1]).Edge()
+            e =BRepBuilderAPI_MakeEdge(pointList[i], pointList[i + 1])
+            directionEdge: TopoDS_Edge = e.Edge()
+            
             directionWire: TopoDS_Wire = BRepBuilderAPI_MakeWire(directionEdge).Wire()
             
             directionCircle: gp_Circ = gp_Circ(gp_Ax2(self.PathPoints[i].CenterPoint, gp_Dir(pointList[i + 1].XYZ().Subtracted(pointList[i].XYZ()))), diameter)

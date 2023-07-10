@@ -6,7 +6,7 @@ from OCC.Core.TColgp import TColgp_HArray1OfPnt, TColgp_Array1OfVec
 from OCC.Display.SimpleGui import init_display
 
 class SplineBuilder:
-    def __init__(self, pathPoints: list[gp_Pnt]) -> None:
+    def __init__(self, pathPoints) -> None:
         self.N = len(pathPoints)
         self.TOLERENCE = 1e-3
         self.PathPoints: list[gp_Pnt] = pathPoints
