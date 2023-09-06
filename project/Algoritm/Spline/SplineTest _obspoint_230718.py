@@ -3,7 +3,7 @@ from OCC.Core.Geom import Geom_BSplineCurve, Geom_Circle
 from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
 from OCC.Core.TColgp import TColgp_Array1OfPnt
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere, BRepPrimAPI_MakeBox
 from OCC.Display.SimpleGui import init_display
 from OCC.Core.BRepExtrema import BRepExtrema_DistShapeShape
 from OCC.Core.BRepOffsetAPI import BRepOffsetAPI_MakePipe
@@ -21,6 +21,8 @@ from OCC.Core.Quantity import (
     Quantity_NOC_WHITE
 )
 from Render.TessellatorShape import TessellatorShape
+from Render.STPRender import STPRender
+from Render.TessellatorCompound import TessellatorCompound
 
 
 
@@ -91,51 +93,40 @@ start = time.time()
 tlt = TessellatorShape(obstacle2, a)
 
 # 샘플링 개수 입력 후 샘플링 진행
-tlt.mesh.RandomSampling(1000)
+tlt.mesh.RandomSampling(100)
 
 # 샘플링 점 가시화
 vertices = tlt.mesh.Points
-print(vertices)
+#print(vertices)
 
-for vertex in vertices:
-    sphere = BRepPrimAPI_MakeSphere(vertex, 10).Shape()
-    a.DisplayShape(sphere, color='black')
+# 가시화
+# for vertex in vertices:
+#     sphere = BRepPrimAPI_MakeSphere(vertex, 10).Shape()
+#     a.DisplayShape(sphere, color='black')
 
 
 
 # Create solid classifier
 classifier = BRepClass3d_SolidClassifier(pipe)
 
-# # Check which vertices are inside the cable
-# inside_vertices = []
-# for vertex in vertices:
-#     classifier.Perform(vertex, 1e-6)  # 1e-6 is the precision, adjust as needed
-#     state = classifier.State()
-#     if state in (TopAbs_ON, TopAbs_IN):
-#         inside_vertices.append(vertex)
+# Check which vertices are inside the cable
+inside_vertices = []
+for vertex in vertices:
+    classifier.Perform(vertex, 1e-6)  # 1e-6 is the precision, adjust as needed
+    state = classifier.State()
+    if state in (TopAbs_ON, TopAbs_IN):
+        inside_vertices.append(vertex)
 
 print("수정 코드 걸린 추가 시간: ",time.time()-start)
 
-# for vertex in inside_vertices:
-#     sphere = BRepPrimAPI_MakeSphere(vertex, 10).Shape()
-#     a.DisplayShape(sphere, color='black')
+for vertex in inside_vertices:
+    sphere = BRepPrimAPI_MakeBox(vertex, 5,5,5).Shape()
+    a.DisplayShape(sphere, color='black')
 
 
 
 
 
-
-
-
-# Diameter for the cable
-diameter = 200.0
-direction_vec = gp_Vec(pole_list[1].XYZ()) - gp_Vec(pole_list[0].XYZ())
-direction_dir = gp_Dir(direction_vec)
-
-circle = Geom_Circle(gp_Ax2(pole_list[0], direction_dir), diameter / 2)
-section = BRepBuilderAPI_MakeEdge(circle).Edge()
-
-pipe = BRepOffsetAPI_MakePipe(wire, section).Shape()
 
 
 

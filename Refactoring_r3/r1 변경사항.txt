@@ -1,0 +1,17 @@
+(1) Spline Builder의
+SplineBuilderExtended 클래스 추가
+
+(2) CurvatureReducer 추가
+
+(3) 메인 코드에
+sb_extended = SplineBuilderExtended(astar.GetPathPoints(), diameter)
+
+# Create an instance of CurvatureReducer and reduce the curvature
+curvature_reducer = CurvatureReducer(sb_extended, threshold)
+curvature_reducer.reduce_curvature()
+
+# You can retrieve the updated path points if needed
+path_points = curvature_reducer.get_updated_path_points()
+추가
+
+seed(43)

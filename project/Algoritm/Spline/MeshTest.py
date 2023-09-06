@@ -23,7 +23,7 @@ a.View.SetBgGradientColors(
 
 # Compound Mesh
 # STP 파일 읽기
-stp = STPRender("RXM4AB1BD.stp", gp_Pnt(10, 10, 10), gp_Pnt(1, 1, 1), a)
+stp = STPRender("a.stp", gp_Pnt(10, 10, 10), gp_Pnt(1, 1, 1), a)
 # STP 파일은 Compound로 되어있음
 # 일반 Shape은 TessellatorShape 으로 진행해야함
 tlt2 = TessellatorCompound(stp.Shape, a)
