@@ -70,9 +70,6 @@ class SplineBuilder:
         return splineShape
     
 class SplineBuilderExtended(SplineBuilder):
-    def __init__(self, gpPntList, diameter=3):
-        super().__init__(gpPntList, diameter)
-
     def get_curve(self) -> Geom_Curve:
         """
         Extract the Geom_Curve object from the SplineShape.
@@ -126,47 +123,3 @@ class SplineBuilderExtended(SplineBuilder):
             u += delta_u
 
         return exceeding_u_values
-    
-    def segment_lengths(self) -> list[float]:
-        """
-        Calculate the straight-line distances for each segment of path_points.
-        """
-        return [self.GpPntList[i].Distance(self.GpPntList[i + 1]) for i in range(len(self.GpPntList) - 1)]
-
-
-    def spline_segment_length(self, start_u, end_u) -> float:
-        """
-        Calculate the length of the spline between the given parameters.
-        """
-        curve = self.get_curve()
-        length = 0
-        delta_u = 0.01
-
-        u = start_u
-        while u < end_u:
-            next_u = min(u + delta_u, end_u)
-            length += curve.Value(u).Distance(curve.Value(next_u))
-            u = next_u
-
-        return length
-    
-    def adjust_spline(self, threshold=0.1):
-        """
-        Adjust the spline if its length in any segment exceeds the path_points length by the given threshold.
-        """
-        segment_lengths = self.segment_lengths()
-        curve = self.get_curve()
-        u_start, u_end = curve.FirstParameter(), curve.LastParameter()
-        u_values = [u_start + i * (u_end - u_start) / (len(self.GpPntList) - 1) for i in range(len(self.GpPntList))]
-
-        for i in range(len(u_values) - 1):
-            spline_length = self.spline_segment_length(u_values[i], u_values[i + 1])
-            if spline_length > (1 + threshold) * segment_lengths[i]:
-                # Adjust the spline using interpolation for this segment
-                # This is a simple example, and you might need more sophisticated interpolation logic
-                exceeding_u_values = self.compute_curvature_over_spline(0.1)
-                new_points = [curve.Value(u) for u in exceeding_u_values]
-                
-                # Combine the old and new points
-                self.GpPntList.extend(new_points)
-                self.GpPntList.sort(key=lambda p: p.X())

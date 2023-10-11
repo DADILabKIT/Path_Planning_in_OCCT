@@ -10,7 +10,7 @@ from Node import Node
 
 class RandomBoxGenerator:
     def __init__(self, start: int, end: int, boxNumber: int = 3) -> None:
-        random.seed(21)#43, 21이 복잡
+        random.seed(21)#43, 21
         self.BoxNumber = boxNumber
         self.Start = start
         self.End = end - 1

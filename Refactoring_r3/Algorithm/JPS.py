@@ -426,7 +426,7 @@ class Jps(Agent):
         #self._InitDistance()
         #self._InitDegree()
 
-if __name__ == "__main__":
+if (__name__ == "__main__"):
 
     a, b, c, d = init_display()
     a.View.SetBackgroundColor(Quantity_TOC_RGB, 0, 0, 0)
@@ -450,24 +450,43 @@ if __name__ == "__main__":
     jps.Run(start, end, grids.NodeMap)
     jps._PostSmoothing(start, end, grids.NodeMap)
     diameter = 3
-    sb = SplineBuilderExtended(jps.GetPathPoints(), diameter)
+    sb = SplineBuilder(jps.GetPathPoints(), diameter)
     sb.DisplaySplineShape(a, _color="black")
     path_points = jps.GetPathPoints()
-    
     print("JPS PS 경로")
     for point in path_points:
-        print('X: ', point.X(), 'Y: ', point.Y(), 'Z: ', point.Z())        
-
-    # Update node center points (for the new spline)
-    for node in jps.PathNodeList:  # Using bf.PathNodeList here
-        point = node.CenterPoint
-        #sphere = BRepPrimAPI_MakeSphere(point, 10).Shape()  # 반지름 10인 구 생성
-        #a.DisplayShape(sphere, color='blue')
+        print('X: ', point.X(), 'Y: ', point.Y(), 'Z: ', point.Z())
 
     # 여기서, sb의 Spline의 curve에 접근해서 곡률을 계산하고, 곡률이 클 때 점을 보간하여 곡률을 완화.
     min_bend_rad = 3 * 6 # 통상적으로 직경의 6~8배의 최소 곡률 반경을 가짐.
     threshold = 0.01  # 임의의 임계치 값
     #threshold = 1 / min_bend_rad # 사용해야할 임계치 값
+
+    sb_extended = SplineBuilderExtended(jps.GetPathPoints(), diameter)
+    
+    # Create an instance of CurvatureReducer and reduce the curvature
+    curvature_reducer = CurvatureReducer(sb_extended, threshold)
+    curvature_reducer.reduce_curvature()
+
+    # You can retrieve the updated path points if needed
+    path_points = curvature_reducer.get_updated_path_points()
+    print("곡률 보간점 경로")
+    for point in path_points:
+        print('X: ', point.X(), 'Y: ', point.Y(), 'Z: ', point.Z())
+            
+    # Update node center points
+    # 업데이트 한 path_points에 맞게 pathnodelist 재구성하기
+    ns = NodeSeacher()
+    nodeList: list[Node] = []
+    for i in path_points:
+        node = ns.GetNode(i ,[1, 0, 0], grids)
+        node.DisplayBoxShape(display=a)
+        nodeList.append(node)
+    jps.PathNodeList = nodeList
+    
+    # Recreate the spline with the modified path points
+    sb = SplineBuilderExtended(path_points, 3)
+    #sb.DisplaySplineShape(a, _color="blue")
     
     print("Collision!!")
     bf = BackTracking(start, end, jps.PathNodeList,
@@ -480,81 +499,32 @@ if __name__ == "__main__":
         extracted_points = [node.CenterPoint for node in bf.PathNodeList]
 
         # 최소 굽힘 반경에 따른 보간점 추가 적용 (for the new spline)
-        sb = SplineBuilderExtended(extracted_points, diameter)
-        curvature_reducer = CurvatureReducer(sb, threshold)
-        curvature_reducer.reduce_curvature()
-        updated_path_points = curvature_reducer.get_updated_path_points()
-        path_points = updated_path_points
+        sb_extended_new = SplineBuilderExtended(extracted_points, diameter)
+        curvature_reducer_new = CurvatureReducer(sb_extended_new, threshold)
+        curvature_reducer_new.reduce_curvature()
+        updated_path_points = curvature_reducer_new.get_updated_path_points()
 
         # Update node center points (for the new spline)
-        for node, point in zip(bf.PathNodeList, path_points):  # Using bf.PathNodeList here
+        for node, point in zip(bf.PathNodeList, updated_path_points):  # Using bf.PathNodeList here
             node.CenterPoint = point
-            # sphere = BRepPrimAPI_MakeSphere(point, 10).Shape()  # 반지름 10인 구 생성
-            # a.DisplayShape(sphere, color='red')
+            sphere = BRepPrimAPI_MakeSphere(point, 10).Shape()  # 반지름 10인 구 생성
+            a.DisplayShape(sphere, color='red')
 
         # Recreate the spline with the updated path points (for the new spline)
-        sb = SplineBuilderExtended(path_points, 3)
-        sb.DisplaySplineShape(a, _color="green")
+        sb_new = SplineBuilderExtended(updated_path_points, 3)
+        sb_new.DisplaySplineShape(a, _color="blue")
 
         print("백트래킹 후 곡률 보간점 경로")
-        for point in path_points:
+        for point in updated_path_points:
             print('X: ', point.X(), 'Y: ', point.Y(), 'Z: ', point.Z())
-            sphere = BRepPrimAPI_MakeSphere(point, 10).Shape()  # 반지름 10인 구 생성
-            a.DisplayShape(sphere, color='blue')
         
         #a.DisplayShape(bf.CandidateSplineList[0][0], color="green")
         bf.DisplayAdditivePoints(a)
-        
     else:
         print("Not Collision")
 
-    # Step 2: Calculate length of each spline segment and check against straight line segment length
-    u_values = []
-    curve = sb.get_curve()
-    proj = GeomAPI_ProjectPointOnCurve()
-
-    for point in path_points:
-        proj.Init(point, curve)
-        if proj.NbPoints() > 0:
-            u_values.append(proj.LowerDistanceParameter())
-        else:
-            u_values.append(0)  # If projection fails, set a high value
-
-    new_path_points = path_points.copy()
-
-    for i in range(len(u_values)-1):
-        print(i,"~",i+1)
-        start_u = u_values[i]
-        end_u = u_values[i+1]
-        
-        # 스플라인 세그먼트 길이 계산
-        spline_length = sb.spline_segment_length(start_u, end_u)
-        print("곡선 길이: ", spline_length)
-        
-        # 직선 세그먼트 길이 계산
-        straight_length = path_points[i].Distance(path_points[i+1])
-        print("직선 길이: ", straight_length)
-
-        # 길이 차이 계산
-        gap_length = abs(spline_length - straight_length)
-        print("길이 차이: ", gap_length)
-
-        # 길이 차이가 10% 초과하는지 확인
-        if (gap_length / straight_length) > 0.1:
-            print("10% 초과!!!!!")
-            insert_point = gp_Pnt((path_points[i].X()+path_points[i+1].X())/2,(path_points[i].Y()+path_points[i+1].Y())/2, (path_points[i].Z()+path_points[i+1].Z())/2)
-            new_path_points.insert(i+1,insert_point)
-            sphere = BRepPrimAPI_MakeSphere(insert_point, 30).Shape()  # 반지름 10인 구 생성
-            a.DisplayShape(sphere, color='red')
-        else:
-            pass
-
-    for point in new_path_points:
-        print('X: ', point.X(), 'Y: ', point.Y(), 'Z: ', point.Z())
-    sb = SplineBuilderExtended(new_path_points, 3)
-    sb.DisplaySplineShape(a, _color="red")
-
-
+    # astar.DisplayPathNodeListByPipe(a, _color="green", diameter=1.5)
+    # astar.DisplayPathNodeListBySpline(a, _color="red", diameter=1.5)
     a.FitAll()
     b()
     pass
